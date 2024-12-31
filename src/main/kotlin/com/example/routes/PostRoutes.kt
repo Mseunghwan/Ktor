@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.postRoutes(postRepository: PostRepository) {
-    route("/g") {
+    route("/api/posts") {
         post {
             val post = call.receive<Post>()
             val createdPost = postRepository.create(post)
