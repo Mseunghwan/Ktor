@@ -61,3 +61,7 @@ function loadPosts() {
             console.error('Error loading posts:', error);
         });
 }
+// 조회하기
+document.getElementById('check').addEventListener('click', function() {
+    loadPosts(); // 버튼 클릭 시 loadPosts 함수 호출
+});
