@@ -31,7 +31,7 @@ document.getElementById('postForm').addEventListener('submit', function (e) {
     const postData = {
         title: document.getElementById('title').value,
         content: document.getElementById('content').value,
-        author: document.getElementById('author').value
+        author: document.getElementById('author').value,
     };
 
     fetch('/api/posts', {
@@ -78,6 +78,7 @@ function loadPosts() {
                         <td>${post.title}</td>
                         <td>${post.content}</td>
                         <td>${post.author}</td>
+                        <td>${new Date(post.created_at).toLocaleString()}</td>
                         <td>
                             <button class="delete-button" data-id="${post.id}">삭제</button>
                         </td>

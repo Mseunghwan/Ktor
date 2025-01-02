@@ -33,4 +33,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.43.0") // Exposed Core
     implementation("org.jetbrains.exposed:exposed-dao:0.43.0") // Exposed DAO
     implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0") // Exposed JDBC
+    implementation("org.jetbrains.exposed:exposed-java-time:0.43.0") // datetime 함수 사용을 위한 모듈
+
+    implementation("io.ktor:ktor-client-core:2.3.4") // 최신 버전 사용
+    implementation("io.ktor:ktor-client-cio:2.3.4") // CIO 엔진
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.4") // Content Negotiation 플러그인
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.4") // Kotlinx JSON 직렬화
 }
