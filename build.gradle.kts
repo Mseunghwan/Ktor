@@ -1,11 +1,7 @@
-val ktor_version: String by project
-val kotlin_version: String by project
-val logback_version: String by project
-
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.0.0"
     id("io.ktor.plugin") version "3.0.2"
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 group = "com.example"
@@ -23,14 +19,18 @@ repositories {
 }
 
 dependencies {
-    dependencies {
-        implementation("io.ktor:ktor-server-core:$ktor_version")
-        implementation("io.ktor:ktor-server-netty:$ktor_version")
-        implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
-        implementation("io.ktor:ktor-serialization-jackson:$ktor_version")
-        implementation("ch.qos.logback:logback-classic:$logback_version")
-        implementation("io.ktor:ktor-server-html-builder:$ktor_version")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.3")
-    }
+    implementation("io.ktor:ktor-server-core:3.0.2")
+    implementation("io.ktor:ktor-server-netty:3.0.2")
+    implementation("io.ktor:ktor-server-content-negotiation:3.0.2")
+    implementation("io.ktor:ktor-serialization-jackson:3.0.2")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("io.ktor:ktor-server-html-builder:3.0.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("mysql:mysql-connector-java:8.0.33")
+
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+    implementation("com.zaxxer:HikariCP:5.0.1") // HikariCP 연결 풀
+    implementation("org.jetbrains.exposed:exposed-core:0.43.0") // Exposed Core
+    implementation("org.jetbrains.exposed:exposed-dao:0.43.0") // Exposed DAO
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0") // Exposed JDBC
 }

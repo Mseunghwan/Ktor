@@ -1,4 +1,3 @@
-// src/main/resources/static/js/main.js
 // 폼 제출 처리 부분을 수정
 document.getElementById('postForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -52,7 +51,7 @@ function loadPosts() {
                         <td>${post.id}</td>
                         <td>${post.title}</td>
                         <td>${post.author}</td>
-                        <td>${new Date(post.createdAt).toLocaleString()}</td>
+                        <td>${post.content}</td>
                     `;
                     tbody.appendChild(row);
                 });

@@ -1,33 +1,67 @@
 package com.example.repositories
 
-import com.example.models.Post
+import com.example.data.models.Post
+import com.example.data.models.Posts
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class PostRepositoryImpl : PostRepository {
-    private val posts = mutableMapOf<Int, Post>()
-    private var currentId = 1
 
     override suspend fun create(post: Post): Post {
-        val newPost = post.copy(id = currentId++)
-        posts[newPost.id] = newPost
-        return newPost
+        var generatedId = 0
+        transaction {
+            generatedId = Posts.insertAndGetId {
+                it[title] = post.title
+                it[content] = post.content
+                it[author] = post.author
+            }.value
+        }
+        return post.copy(id = generatedId)
     }
 
     override suspend fun getAll(): List<Post> {
-        return posts.values.toList()
+        return transaction {
+            Posts.selectAll().map {
+                Post(
+                    id = it[Posts.id].value,
+                    title = it[Posts.title],
+                    content = it[Posts.content],
+                    author = it[Posts.author]
+                )
+            }
+        }
     }
 
     override suspend fun getById(id: Int): Post? {
-        return posts[id]
+        return transaction {
+            Posts.select { Posts.id eq id }
+                .map {
+                    Post(
+                        id = it[Posts.id].value,
+                        title = it[Posts.title],
+                        content = it[Posts.content],
+                        author = it[Posts.author]
+                    )
+                }.singleOrNull()
+        }
     }
 
     override suspend fun update(id: Int, post: Post): Post? {
-        if (!posts.containsKey(id)) return null
-        val updatedPost = post.copy(id = id)
-        posts[id] = updatedPost
-        return updatedPost
+        var updatedRows = 0
+        transaction {
+            updatedRows = Posts.update({ Posts.id eq id }) {
+                it[title] = post.title
+                it[content] = post.content
+                it[author] = post.author
+            }
+        }
+        return if (updatedRows > 0) getById(id) else null
     }
 
     override suspend fun delete(id: Int): Boolean {
-        return posts.remove(id) != null
+        return transaction {
+            Posts.deleteWhere { Posts.id eq id } > 0
+        }
     }
 }

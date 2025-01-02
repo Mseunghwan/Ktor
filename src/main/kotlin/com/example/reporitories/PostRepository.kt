@@ -1,6 +1,6 @@
 package com.example.repositories
 
-import com.example.models.Post
+import com.example.data.models.Post
 
 // 동작 인터페이스
 interface PostRepository {
