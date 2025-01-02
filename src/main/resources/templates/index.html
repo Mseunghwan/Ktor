@@ -9,10 +9,7 @@
 <nav>
     <div class="nav-container">
         <h1 class="nav-title">게시판</h1>
-        <div class="buttons">
         <button class="button" onclick="showModal()">새 글 작성</button>
-        <button class="button" id="check">글 조회하기</button>
-        </div>
     </div>
 </nav>
 
@@ -41,13 +38,13 @@
 
     <!-- Posts Table -->
     <div class="posts-table">
-        <table>
+        <table id="posts">
             <thead>
             <tr>
-                <th>번호</th>
-                <th>제목</th>
-                <th>내용</th>
-                <th>작성자</th>
+                <th>id</th>
+                <th>title</th>
+                <th>content</th>
+                <th>author</th>
                 <th>관리</th>
             </tr>
             </thead>

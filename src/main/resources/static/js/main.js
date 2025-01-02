@@ -75,7 +75,7 @@ function loadPosts() {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${post.id}</td>
-                        <td>${post.title}</td>g
+                        <td>${post.title}</td>
                         <td>${post.content}</td>
                         <td>${post.author}</td>
                         <td>
@@ -116,8 +116,3 @@ function deletePost(postId) {
             console.error('Error deleting post:', error);
         });
 }
-
-// 조회하기 버튼 클릭 이벤트 추가
-document.getElementById('check').addEventListener('click', function () {
-    loadPosts(); // 버튼 클릭 시 loadPosts 함수 호출
-});
