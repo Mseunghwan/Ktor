@@ -20,7 +20,7 @@ val client = HttpClient(CIO) {
 
 fun main() {
     val apiKey = "your_alpha_vantage_api_key" // 발급받은 API 키
-    val symbol = "AAPL" // Apple 주식 티커
+    val symbol = "TSLA" // Apple 주식 티커
 
     runBlocking {
         val response: HttpResponse = client.get("https://www.alphavantage.co/query") {

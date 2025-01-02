@@ -2,6 +2,33 @@ plugins {
     kotlin("jvm") version "2.0.0"
     id("io.ktor.plugin") version "3.0.2"
     kotlin("plugin.serialization") version "2.0.0"
+    id("com.github.node-gradle.node") version "3.5.1"
+}
+
+// Node 설정 추가
+node {
+    version.set("18.16.0")
+    download.set(true)
+    workDir.set(file("${project.buildDir}/nodejs"))
+    npmWorkDir.set(file("${project.buildDir}/npm"))
+
+    // webapp 디렉토리 설정
+    nodeProjectDir.set(file("${project.projectDir}/src/main/resources/webapp/frontend"))
+}
+
+// React 빌드 태스크 추가
+tasks {
+    val npmBuild = register<com.github.gradle.node.npm.task.NpmTask>("npmBuild") {
+        args.set(listOf("run", "build"))
+        dependsOn("npmInstall")
+        inputs.dir("src/main/resources/webapp/frontend/src")
+        outputs.dir("src/main/resources/webapp/frontend/dist")
+    }
+
+    // 메인 빌드 태스크에 React 빌드 추가
+    named("processResources") {
+        dependsOn(npmBuild)
+    }
 }
 
 group = "com.example"

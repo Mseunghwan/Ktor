@@ -44,8 +44,19 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
     val postRepository: PostRepository = PostRepositoryImpl()
 
     routing {
-        // 정적 파일 제공을 위한 설정
+        // API 라우트
+        route("/api") {
+            postRoutes(postRepository)
+        }
+
+        // 정적 파일 제공 (CSS, JS 등)
         staticResources("/static", "static")
-        postRoutes(postRepository)
+
+        // React 앱 서빙
+
+        static("/") {
+            resources("webapp/frontend/dist")
+            defaultResource("webapp/frontend/dist/index.html")
+        }
     }
 }
