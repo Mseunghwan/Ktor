@@ -20,12 +20,11 @@ fun main() {
     embeddedServer(Netty, port = 8080, module = {
         // 수동으로 설정 추가
         val config = MapApplicationConfig().apply {
-            put("database.driver", "org.mariadb.jdbc.Driver")
-            put("database.url", "jdbc:mariadb://localhost:3306/vacation_ktor")
-            put("database.user", "m1")
-            put("database.password", "123456")
+            put("database.driver", System.getenv("DB_DRIVER") ?: "org.mariadb.jdbc.Driver")
+            put("database.url", System.getenv("DB_URL") ?: "jdbc:mariadb://localhost:3306/vacation_ktor")
+            put("database.user", System.getenv("DB_USER") ?: "default_user")
+            put("database.password", System.getenv("DB_PASSWORD") ?: "default_password")
         }
-
         module(config)
     }).start(wait = true)
 }
