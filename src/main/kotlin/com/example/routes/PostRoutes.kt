@@ -3,11 +3,20 @@ package com.example.routes
 import com.example.data.models.Post
 import com.example.repositories.PostRepository
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.postRoutes(postRepository: PostRepository) {
+    get("/") {
+        val file = Application::class.java.classLoader.getResource("templates/index.html")
+        if (file != null) {
+            call.respondText(file.readText(), ContentType.Text.Html)
+        } else {
+            call.respond(HttpStatusCode.NotFound)
+        }
+    }
     route("/api/posts") {
         post {
             val post = call.receive<Post>() // 클라이언트가 보낸 JSON을 Post 객체로 변환
