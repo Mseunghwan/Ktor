@@ -55,6 +55,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
     implementation("mysql:mysql-connector-java:8.0.33")
 
+
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
     implementation("com.zaxxer:HikariCP:5.0.1") // HikariCP 연결 풀
     implementation("org.jetbrains.exposed:exposed-core:0.43.0") // Exposed Core
@@ -64,7 +65,9 @@ dependencies {
 
     implementation("io.ktor:ktor-client-core:2.3.4") // 최신 버전 사용
     implementation("io.ktor:ktor-client-cio:2.3.4") // CIO 엔진
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.4") // Content Negotiation 플러그인
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.4") // Kotlinx JSON 직렬화
+
+    implementation("io.ktor:ktor-client-content-negotiation:3.0.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
     implementation("io.ktor:ktor-server-cors:3.0.2")
+
 }

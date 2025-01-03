@@ -19,7 +19,7 @@ val client = HttpClient(CIO) {
 }
 
 fun main() {
-    val apiKey = "your_alpha_vantage_api_key" // 발급받은 API 키
+    val apiKey = "UEHWN0KQRKUCS009" // 발급받은 API 키
     val symbol = "TSLA" // Apple 주식 티커
 
     runBlocking {
@@ -28,6 +28,7 @@ fun main() {
             parameter("symbol", symbol)
             parameter("apikey", apiKey)
         }
+
 
         // JSON 응답 파싱 및 첫 번째 데이터 추출
         val responseBody = response.bodyAsText()
@@ -39,5 +40,13 @@ fun main() {
             println("가장 최근 날짜: $date")
             println("가장 최근 데이터: $data")
         } ?: println("Time Series 데이터를 찾을 수 없습니다.")
+    }
+
+    suspend fun searchSymbols(keywords: String): HttpResponse {
+        return client.get("https://www.alphavantage.co/query") {
+            parameter("function", "SYMBOL_SEARCH")
+            parameter("keywords", keywords)
+            parameter("apikey", apiKey)
+        }
     }
 }

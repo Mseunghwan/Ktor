@@ -5,12 +5,15 @@ import com.example.data.models.Post
 import com.example.repositories.PostRepository
 import com.example.repositories.PostRepositoryImpl
 import com.example.routes.postRoutes
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.routing.*
 import io.ktor.server.config.*
 import io.ktor.server.http.content.*
@@ -33,6 +36,15 @@ fun main() {
 
 
 fun Application.module(customConfig: ApplicationConfig? = null) {
+
+    val httpClient = HttpClient(CIO) {
+        expectSuccess = true
+    }
+
+    // API key 설정
+    val apiKey = "UEHWN0KQRKUCS009"  // 실제 환경에서는 환경변수나 설정 파일에서 가져오는 것이 좋습니다
+
+
     val config = customConfig ?: environment.config
 
     install(ContentNegotiation) {
@@ -65,6 +77,8 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
         }
 
         // API 라우트
-        postRoutes(postRepository)
+        postRoutes(postRepository,
+            httpClient = httpClient,
+            apiKey = apiKey)
     }
 }
