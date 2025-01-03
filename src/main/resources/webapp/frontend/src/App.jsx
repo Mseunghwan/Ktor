@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState, useEffect } from 'react'
-import PortfolioSection from './components/PortfolioSection'
+import PortfolioDashboard from './components/PortfolioDashboard'
 import PostList from './components/PostList'
 import PostModal from './components/PostModal'
 import './styles/style.css'
@@ -27,7 +27,7 @@ function App() {
         <div className="app">
             <nav className="main-nav">
                 <div className="nav-container">
-                    <h1 className="nav-title">Stock Portfolio</h1>
+                    <h1 className="nav-title">Portfolio Analysis</h1>
                     <div className="nav-links">
                         <a href="#portfolio">포트폴리오</a>
                         <a href="#community">커뮤니티</a>
@@ -37,7 +37,7 @@ function App() {
 
             <main>
                 <section id="portfolio" className="hero-section">
-                    <PortfolioSection />
+                    <PortfolioDashboard />
                 </section>
 
                 <section id="community" className="community-section">
@@ -68,5 +68,4 @@ function App() {
         </div>
     )
 }
-
 export default App;

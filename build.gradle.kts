@@ -66,4 +66,5 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.4") // CIO 엔진
     implementation("io.ktor:ktor-client-content-negotiation:2.3.4") // Content Negotiation 플러그인
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.4") // Kotlinx JSON 직렬화
+    implementation("io.ktor:ktor-server-cors:3.0.2")
 }

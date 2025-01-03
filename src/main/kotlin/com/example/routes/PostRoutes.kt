@@ -9,15 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.postRoutes(postRepository: PostRepository) {
-    get("/") {
-        val file = Application::class.java.classLoader.getResource("templates/index.html")
-        if (file != null) {
-            call.respondText(file.readText(), ContentType.Text.Html)
-        } else {
-            call.respond(HttpStatusCode.NotFound)
-        }
-    }
-
+    // API 라우트를 /api/posts로 직접 설정
     route("/api/posts") {
         post {
             val post = call.receive<Post>()
@@ -45,14 +37,12 @@ fun Route.postRoutes(postRepository: PostRepository) {
                 ?: return@put call.respond(HttpStatusCode.BadRequest, "Invalid ID")
 
             val post = call.receive<Post>()
-
-            // 클라이언트가 `created_at`을 수정하지 못하도록 보장
             val existingPost = postRepository.getById(id)
                 ?: return@put call.respond(HttpStatusCode.NotFound, "Post not found")
 
             val updatedPost = postRepository.update(
                 id,
-                post.copy(created_at = existingPost.created_at) // 기존 `created_at` 유지
+                post.copy(created_at = existingPost.created_at)
             ) ?: return@put call.respond(HttpStatusCode.NotFound, "Post not found")
 
             call.respond(updatedPost)

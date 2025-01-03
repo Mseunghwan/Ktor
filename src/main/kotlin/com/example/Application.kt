@@ -14,6 +14,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.routing.*
 import io.ktor.server.config.*
 import io.ktor.server.http.content.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 
@@ -32,31 +33,38 @@ fun main() {
 
 
 fun Application.module(customConfig: ApplicationConfig? = null) {
-    // 커스텀 설정이 있으면 사용, 없으면 기본 environment 설정 사용
     val config = customConfig ?: environment.config
 
     install(ContentNegotiation) {
         jackson()
     }
 
-    DatabaseFactory.init(config)
+    // CORS 추가
+    install(CORS) {
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowHeader(HttpHeaders.ContentType)
+        anyHost()
+    }
 
+    DatabaseFactory.init(config)
     val postRepository: PostRepository = PostRepositoryImpl()
 
     routing {
-        // API 라우트
-        route("/api") {
-            postRoutes(postRepository)
-        }
-
-        // 정적 파일 제공 (CSS, JS 등)
-        staticResources("/static", "static")
-
-        // React 앱 서빙
-
+        // React 앱 서빙 (먼저 선언)
         static("/") {
             resources("webapp/frontend/dist")
             defaultResource("webapp/frontend/dist/index.html")
         }
+
+        // 정적 파일 제공
+        static("/static") {
+            resources("static")
+        }
+
+        // API 라우트
+        postRoutes(postRepository)
     }
 }
