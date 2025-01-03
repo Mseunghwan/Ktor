@@ -1,12 +1,14 @@
 package com.example.data
 
-import com.example.data.models.Posts
+import com.example.data.models.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import io.ktor.server.config.*
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object DatabaseFactory {
     private fun hikari(config: ApplicationConfig): HikariDataSource {
@@ -28,6 +30,12 @@ object DatabaseFactory {
 
         transaction {
             SchemaUtils.create(Posts)
+            SchemaUtils.create(kospi)
+            SchemaUtils.create(nasdaq)
+            SchemaUtils.create(nyse)
         }
     }
+
+    suspend fun <T> dbQuery(block: suspend () -> T): T =
+        newSuspendedTransaction(Dispatchers.IO) { block() }
 }

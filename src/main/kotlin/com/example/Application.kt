@@ -1,9 +1,10 @@
 package com.example
 
 import com.example.data.DatabaseFactory
-import com.example.data.models.Post
 import com.example.repositories.PostRepository
 import com.example.repositories.PostRepositoryImpl
+import com.example.repositories.StockRepository
+import com.example.repositories.StockRepositoryImpl
 import com.example.routes.postRoutes
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -13,13 +14,11 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.routing.*
 import io.ktor.server.config.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
+
 
 fun main() {
     embeddedServer(Netty, port = 8080, module = {
@@ -37,19 +36,13 @@ fun main() {
 
 fun Application.module(customConfig: ApplicationConfig? = null) {
 
-    val httpClient = HttpClient(CIO) {
-        expectSuccess = true
+    install(ContentNegotiation) {
+        jackson()
     }
-
-    // API key 설정
-    val apiKey = "UEHWN0KQRKUCS009"  // 실제 환경에서는 환경변수나 설정 파일에서 가져오는 것이 좋습니다
 
 
     val config = customConfig ?: environment.config
 
-    install(ContentNegotiation) {
-        jackson()
-    }
 
     // CORS 추가
     install(CORS) {
@@ -63,9 +56,21 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
 
     DatabaseFactory.init(config)
     val postRepository: PostRepository = PostRepositoryImpl()
+    val stockRepository: StockRepository = StockRepositoryImpl()
+    val apiKey = "UEHWN0KQRKUCS009"
+    val httpClient = HttpClient(CIO) {
+        expectSuccess = true
+    }
 
     routing {
-        // React 앱 서빙 (먼저 선언)
+        // API 라우트를 먼저 선언
+        postRoutes(
+            postRepository = postRepository,
+            httpClient = httpClient,
+            apiKey = apiKey,
+            stockRepository = stockRepository  // 추가
+        )
+        // React 앱 서빙
         static("/") {
             resources("webapp/frontend/dist")
             defaultResource("webapp/frontend/dist/index.html")
@@ -75,10 +80,5 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
         static("/static") {
             resources("static")
         }
-
-        // API 라우트
-        postRoutes(postRepository,
-            httpClient = httpClient,
-            apiKey = apiKey)
     }
 }

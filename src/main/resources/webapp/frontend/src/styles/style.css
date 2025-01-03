@@ -82,6 +82,30 @@ body {
     text-align: center;
 }
 
+.market-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    margin-right: 1rem;
+    background-color: white;
+}
+
+.result-sector {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-right: 1rem;
+}
+
+.stock-market {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+}
+
 .stock-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

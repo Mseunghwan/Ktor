@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 const PortfolioDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedMarket, setSelectedMarket] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [portfolio, setPortfolio] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
-    // 검색 디바운싱을 위한 타이머
     useEffect(() => {
         if (searchTerm.length < 2) {
             setSearchResults([]);
@@ -15,35 +15,26 @@ const PortfolioDashboard = () => {
 
         const timer = setTimeout(() => {
             handleSearch();
-        }, 500);
+        }, 300); // 디바운스 시간을 300ms로 조정
 
         return () => clearTimeout(timer);
-    }, [searchTerm]);
+    }, [searchTerm, selectedMarket]);
 
     const handleSearch = async () => {
         if (!searchTerm || searchTerm.length < 2) return;
 
         setIsSearching(true);
         try {
-            const response = await fetch(`/api/stock/search?keywords=${encodeURIComponent(searchTerm)}`);
+            const url = `/api/stock/search?keywords=${encodeURIComponent(searchTerm)}${
+                selectedMarket ? `&market=${selectedMarket}` : ''
+            }`;
+            const response = await fetch(url);
             const data = await response.json();
 
-            // API 응답 구조에 맞게 파싱
-            const matches = data.bestMatches || [];
-            const formattedResults = matches.map(match => ({
-                symbol: match['1. symbol'],
-                name: match['2. name'],
-                type: match['3. type'],
-                region: match['4. region'],
-                marketOpen: match['5. marketOpen'],
-                marketClose: match['6. marketClose'],
-                timezone: match['7. timezone'],
-                currency: match['8. currency'],
-            }));
-
-            setSearchResults(formattedResults);
+            setSearchResults(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Search error:', error);
+            setSearchResults([]);
         } finally {
             setIsSearching(false);
         }
@@ -55,35 +46,31 @@ const PortfolioDashboard = () => {
             return;
         }
 
-        try {
-            // 선택된 주식의 현재 가격 정보 가져오기
-            const response = await fetch(`/api/stock/daily?symbol=${stock.symbol}`);
-            const data = await response.json();
+        const newStock = {
+            ...stock,
+            allocation: 0,
+            addedAt: new Date().toISOString()
+        };
 
-            // 최신 가격 정보 추출
-            const latestData = data['Time Series (Daily)'][Object.keys(data['Time Series (Daily)'])[0]];
-            const currentPrice = latestData['4. close'];
-
-            const newStock = {
-                ...stock,
-                price: currentPrice,
-                allocation: 0, // 초기 비중은 0%로 설정
-                addedAt: new Date().toISOString()
-            };
-
-            setPortfolio(prev => [...prev, newStock]);
-            setSearchResults([]);
-            setSearchTerm('');
-        } catch (error) {
-            console.error('Error adding stock to portfolio:', error);
-            alert('주식 정보를 가져오는데 실패했습니다.');
-        }
+        setPortfolio(prev => [...prev, newStock]);
+        setSearchResults([]);
+        setSearchTerm('');
     };
 
     return (
         <div className="portfolio-dashboard">
             <div className="search-section">
                 <div className="search-container">
+                    <select
+                        className="market-select"
+                        value={selectedMarket}
+                        onChange={(e) => setSelectedMarket(e.target.value)}
+                    >
+                        <option value="">모든 시장</option>
+                        <option value="KOSPI">KOSPI</option>
+                        <option value="NASDAQ">NASDAQ</option>
+                        <option value="NYSE">NYSE</option>
+                    </select>
                     <input
                         type="text"
                         className="search-input"
@@ -105,9 +92,13 @@ const PortfolioDashboard = () => {
                                 <div className="result-info">
                                     <div className="result-symbol">{result.symbol}</div>
                                     <div className="result-name">{result.name}</div>
+                                    {result.sector && (
+                                        <div className="result-sector">{result.sector}</div>
+                                    )}
                                 </div>
-                                <div className="result-region">
-                                    {result.region} | {result.currency}
+                                <div className="result-details">
+                                    <span className="stock-market">{result.market}</span>
+                                    <button className="add-button">추가</button>
                                 </div>
                             </div>
                         ))}
@@ -126,7 +117,7 @@ const PortfolioDashboard = () => {
                                     <span className="stock-name">{stock.name}</span>
                                 </div>
                                 <div className="stock-details">
-                                    <span className="stock-price">${stock.price}</span>
+                                    <span className="stock-market">{stock.market}</span>
                                     <span className="stock-allocation">
                                         {stock.allocation}%
                                     </span>
