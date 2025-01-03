@@ -5,7 +5,12 @@
     --background-color: #f5f5f7;
     --card-background: #ffffff;
 }
-
+#root {
+    width: 100%;
+}
+#community{
+    width:100%
+}
 * {
     margin: 0;
     padding: 0;

@@ -21,7 +21,7 @@ const PostList = ({ posts, onPostsChange }) => {
 
     return (
         <div className="posts-table">
-            <table>
+            <table id="community">
                 <thead>
                 <tr>
                     <th>id</th>
