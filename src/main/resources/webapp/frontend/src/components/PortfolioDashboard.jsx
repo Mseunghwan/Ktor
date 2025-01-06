@@ -12,13 +12,10 @@ const PortfolioDashboard = () => {
     const [purchaseType, setPurchaseType] = useState('shares');
     const [showStockInput, setShowStockInput] = useState(false);
 
-    // COLORS 배열 정의
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#F50057', '#6200EA', '#00B8D4', '#00BFA5'];
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-    // handleSearch를 useCallback으로 감싸기
     const handleSearch = useCallback(async () => {
         if (!searchTerm || searchTerm.length < 2) return;
-
         setIsSearching(true);
         try {
             const url = `/api/stock/search?keywords=${encodeURIComponent(searchTerm)}${
@@ -26,7 +23,6 @@ const PortfolioDashboard = () => {
             }`;
             const response = await fetch(url);
             const data = await response.json();
-
             setSearchResults(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Search error:', error);
@@ -36,70 +32,22 @@ const PortfolioDashboard = () => {
         }
     }, [searchTerm, selectedMarket]);
 
-    // useEffect에 handleSearch 추가
     useEffect(() => {
         if (searchTerm.length < 2) {
             setSearchResults([]);
             return;
         }
-
-        const timer = setTimeout(() => {
-            handleSearch();
-        }, 300);
-
+        const timer = setTimeout(handleSearch, 300);
         return () => clearTimeout(timer);
     }, [searchTerm, selectedMarket, handleSearch]);
 
-    // 나머지 코드는 동일...
-    const handleStockSelection = (stock) => {
+    // 주식 선택 핸들러를 상수로 정의
+    const handleStockSelection = useCallback((stock) => {
         setSelectedStock(stock);
         setShowStockInput(true);
         setSearchResults([]);
         setSearchTerm('');
-    };
-
-    const handleQuantitySubmit = () => {
-        if (!selectedStock || !quantity || parseFloat(quantity) <= 0) {
-            alert('유효한 수량이나 금액을 입력해주세요.');
-            return;
-        }
-
-        const quantityNum = parseFloat(quantity);
-        const stockPrice = 100000; // 임시 가격, 실제로는 API에서 가져와야 함
-
-        let totalAmount;
-        let finalQuantity;
-
-        if (purchaseType === 'shares') {
-            totalAmount = quantityNum * stockPrice;
-            finalQuantity = quantityNum;
-        } else {
-            totalAmount = quantityNum;
-            finalQuantity = (quantityNum / stockPrice).toFixed(2);
-        }
-
-        const newStock = {
-            ...selectedStock,
-            quantity: finalQuantity,
-            totalAmount: totalAmount,
-            purchaseType: purchaseType,
-            percentage: 0 // 나중에 재계산
-        };
-
-        setPortfolio(prev => {
-            const newPortfolio = [...prev, newStock];
-            const totalPortfolioAmount = newPortfolio.reduce((sum, stock) => sum + stock.totalAmount, 0);
-
-            return newPortfolio.map(stock => ({
-                ...stock,
-                percentage: Number(((stock.totalAmount / totalPortfolioAmount) * 100).toFixed(1))
-            }));
-        });
-
-        setSelectedStock(null);
-        setQuantity('');
-        setShowStockInput(false);
-    };
+    }, []);
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('ko-KR', {
@@ -108,7 +56,73 @@ const PortfolioDashboard = () => {
         }).format(value);
     };
 
-    // 차트 데이터 준비
+    const handleQuantitySubmit = async () => {
+        if (!selectedStock || !quantity || parseFloat(quantity) <= 0) {
+            alert('유효한 수량이나 금액을 입력해주세요.');
+            return;
+        }
+
+        try {
+            // 임시로 랜덤한 가격 생성 (실제 구현 시에는 API에서 가져와야 함)
+            const currentPrice = Math.floor(Math.random() * (100000 - 10000) + 10000);
+
+            if (!currentPrice) {
+                throw new Error('현재가 데이터 없음');
+            }
+
+            const quantityNum = parseFloat(quantity);
+            let totalAmount;
+            let finalQuantity;
+
+            if (purchaseType === 'shares') {
+                totalAmount = quantityNum * currentPrice;
+                finalQuantity = quantityNum;
+            } else {
+                totalAmount = quantityNum;
+                finalQuantity = quantityNum / currentPrice;
+            }
+
+            const newStock = {
+                ...selectedStock,
+                quantity: finalQuantity,
+                price: currentPrice,
+                totalAmount: totalAmount,
+                purchaseType: purchaseType,
+            };
+
+            setPortfolio(prev => {
+                const existingStockIndex = prev.findIndex(s => s.symbol === newStock.symbol);
+                let updatedPortfolio;
+
+                if (existingStockIndex >= 0) {
+                    const existingStock = prev[existingStockIndex];
+                    const updatedStock = {
+                        ...existingStock,
+                        quantity: existingStock.quantity + newStock.quantity,
+                        totalAmount: existingStock.totalAmount + newStock.totalAmount,
+                    };
+                    updatedPortfolio = [...prev];
+                    updatedPortfolio[existingStockIndex] = updatedStock;
+                } else {
+                    updatedPortfolio = [...prev, newStock];
+                }
+
+                const totalPortfolioAmount = updatedPortfolio.reduce((sum, stock) => sum + stock.totalAmount, 0);
+                return updatedPortfolio.map(stock => ({
+                    ...stock,
+                    percentage: Number(((stock.totalAmount / totalPortfolioAmount) * 100).toFixed(1))
+                }));
+            });
+
+            setSelectedStock(null);
+            setQuantity('');
+            setShowStockInput(false);
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || '주식 추가 중 오류가 발생했습니다.');
+        }
+    };
+
     const chartData = portfolio.map((stock) => ({
         name: `${stock.symbol} (${stock.percentage}%)`,
         value: stock.percentage
@@ -163,7 +177,15 @@ const PortfolioDashboard = () => {
                                     </div>
                                     <div className="result-details">
                                         <span className="stock-market">{result.market}</span>
-                                        <button className="add-button glass-button">선택</button>
+                                        <button
+                                            className="add-button glass-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleStockSelection(result);
+                                            }}
+                                        >
+                                            선택
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -172,6 +194,7 @@ const PortfolioDashboard = () => {
                 </div>
             </div>
 
+            {/* Portfolio Overview and Chart Section */}
             <div className="portfolio-overview glass-card">
                 <div className="portfolio-chart-section">
                     <h2>포트폴리오 구성</h2>
@@ -184,7 +207,7 @@ const PortfolioDashboard = () => {
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
-                                        label={({ name, percent }) => `${name}`}
+                                        label={({ name }) => name}
                                         outerRadius={160}
                                         fill="#8884d8"
                                         dataKey="value"
@@ -221,8 +244,8 @@ const PortfolioDashboard = () => {
                                     onChange={(e) => setPurchaseType(e.target.value)}
                                     className="purchase-type-select glass-effect"
                                 >
-                                    <option value="shares">주식 수량</option>
-                                    <option value="amount">투자 금액</option>
+                                    <option value="shares">주식 수량 (주)</option>
+                                    <option value="amount">투자 금액 (원)</option>
                                 </select>
                                 <input
                                     type="number"
@@ -236,7 +259,10 @@ const PortfolioDashboard = () => {
                                         확인
                                     </button>
                                     <button
-                                        onClick={() => setShowStockInput(false)}
+                                        onClick={() => {
+                                            setShowStockInput(false);
+                                            setSelectedStock(null);
+                                        }}
                                         className="cancel-button glass-button"
                                     >
                                         취소
@@ -260,12 +286,10 @@ const PortfolioDashboard = () => {
                             <div className="stock-details">
                                 <span className="stock-quantity">
                                     {stock.purchaseType === 'shares'
-                                        ? `${stock.quantity}주 (${formatCurrency(stock.totalAmount)})`
+                                        ? `${stock.quantity.toFixed(2)}주 (${formatCurrency(stock.totalAmount)})`
                                         : formatCurrency(stock.totalAmount)}
                                 </span>
-                                <span className="stock-percentage">
-                                    {stock.percentage}%
-                                </span>
+                                <span className="stock-percentage">{stock.percentage}%</span>
                             </div>
                         </div>
                     ))}
