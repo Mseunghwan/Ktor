@@ -9,12 +9,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.client.*
 
-private const val apiKey = "UEHWN0KQRKUCS009"
-
 fun Route.postRoutes(
     postRepository: PostRepository,
-    httpClient: HttpClient,
-    apiKey: String,
     stockRepository: StockRepository
 ) {
     // API 라우트를 /api/posts로 직접 설정

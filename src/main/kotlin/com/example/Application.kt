@@ -6,8 +6,6 @@ import com.example.repositories.PostRepositoryImpl
 import com.example.repositories.StockRepository
 import com.example.repositories.StockRepositoryImpl
 import com.example.routes.postRoutes
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -57,17 +55,11 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
     DatabaseFactory.init(config)
     val postRepository: PostRepository = PostRepositoryImpl()
     val stockRepository: StockRepository = StockRepositoryImpl()
-    val apiKey = "UEHWN0KQRKUCS009"
-    val httpClient = HttpClient(CIO) {
-        expectSuccess = true
-    }
 
     routing {
         // API 라우트를 먼저 선언
         postRoutes(
             postRepository = postRepository,
-            httpClient = httpClient,
-            apiKey = apiKey,
             stockRepository = stockRepository  // 추가
         )
         // React 앱 서빙
