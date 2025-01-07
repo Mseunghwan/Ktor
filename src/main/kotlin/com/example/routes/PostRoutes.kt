@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.client.*
 
+
 fun Route.postRoutes(
     postRepository: PostRepository,
     stockRepository: StockRepository
@@ -80,4 +81,21 @@ fun Route.postRoutes(
             }
         }
     }
+
+    get("/api/stock/price") {
+        try {
+            val symbol = call.parameters["symbol"]
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "Symbol parameter is required")
+            val market = call.parameters["market"]
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "Market parameter is required")
+
+            val price = stockRepository.getStockPrice(symbol, market)
+                ?: return@get call.respond(HttpStatusCode.NotFound, "Price not found")
+
+            call.respond(hashMapOf("price" to price))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, "Failed to fetch stock price: ${e.message}")
+        }
+    }
+
 }

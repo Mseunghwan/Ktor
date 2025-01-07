@@ -6,10 +6,15 @@ import com.example.data.models.kospi
 import com.example.data.models.nasdaq
 import com.example.data.models.nyse
 import org.jetbrains.exposed.sql.*
+import org.python.core.PyObject
+import org.python.util.PythonInterpreter
+import org.python.core.Py
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+
 
 interface StockRepository {
     suspend fun searchStocks(keyword: String, market: String? = null): List<Stock>
+    suspend fun getStockPrice(symbol: String, market: String): Double? // 추가
 }
 
 class StockRepositoryImpl : StockRepository {
@@ -61,4 +66,29 @@ class StockRepositoryImpl : StockRepository {
             searchInTable(table)
         }.take(10)
     }
-}
+
+    override suspend fun getStockPrice(symbol: String, market: String): Double? = dbQuery {
+        try {
+            val interpreter = PythonInterpreter()
+
+            interpreter.exec("import FinanceDataReader as fdr")
+            interpreter.exec("""
+            def get_last_price(symbol):
+                try:
+                    df = fdr.DataReader(symbol)
+                    return str(df['Close'].iloc[-1])
+                except Exception as e:
+                    print(f"Error in get_last_price: {str(e)}")
+                    return None
+        """)
+
+            val pyFunc = interpreter.get("get_last_price")
+            val result = pyFunc.__call__(Py.newString(symbol))
+
+            result?.toString()?.toDoubleOrNull()
+        } catch (e: Exception) {
+            println("Error fetching stock price: ${e.message}")
+            null
+        }
+    }
+    }

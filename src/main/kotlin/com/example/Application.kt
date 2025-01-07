@@ -6,6 +6,7 @@ import com.example.repositories.PostRepositoryImpl
 import com.example.repositories.StockRepository
 import com.example.repositories.StockRepositoryImpl
 import com.example.routes.postRoutes
+import com.example.routes.stockRoutes
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -57,11 +58,13 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
     val stockRepository: StockRepository = StockRepositoryImpl()
 
     routing {
-        // API 라우트를 먼저 선언
+        // API 라우트들을 먼저 선언
         postRoutes(
             postRepository = postRepository,
-            stockRepository = stockRepository  // 추가
+            stockRepository = stockRepository
         )
+        stockRoutes(stockRepository) // 추가된 부분
+
         // React 앱 서빙
         static("/") {
             resources("webapp/frontend/dist")

@@ -70,4 +70,5 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
     implementation("io.ktor:ktor-server-cors:3.0.2")
 
+    implementation("org.python:jython-standalone:2.7.3")
 }
