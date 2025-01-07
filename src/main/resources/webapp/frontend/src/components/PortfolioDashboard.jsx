@@ -58,7 +58,7 @@ const PortfolioDashboard = () => {
 
     const handleQuantitySubmit = async () => {
         if (!selectedStock || !quantity || parseFloat(quantity) <= 0) {
-            alert('유효한 수량이나 금액을 입력해주세요.');
+            alert('유효한 수량이나 금액을 입력해야 합니다');
             return;
         }
 
