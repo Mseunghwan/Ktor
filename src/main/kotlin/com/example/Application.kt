@@ -1,10 +1,13 @@
 package com.example
 
 import com.example.data.DatabaseFactory
+import com.example.repositories.NewsRepository
+import com.example.repositories.NewsRepositoryImpl
 import com.example.repositories.PostRepository
 import com.example.repositories.PostRepositoryImpl
 import com.example.repositories.StockRepository
 import com.example.repositories.StockRepositoryImpl
+import com.example.routes.newsRoutes
 import com.example.routes.postRoutes
 import com.example.routes.stockRoutes
 import io.ktor.http.*
@@ -56,6 +59,7 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
     DatabaseFactory.init(config)
     val postRepository: PostRepository = PostRepositoryImpl()
     val stockRepository: StockRepository = StockRepositoryImpl()
+    val newsRepository: NewsRepository = NewsRepositoryImpl()
 
     routing {
         // API 라우트들을 먼저 선언
@@ -64,6 +68,7 @@ fun Application.module(customConfig: ApplicationConfig? = null) {
             stockRepository = stockRepository
         )
         stockRoutes(stockRepository) // 추가된 부분
+        newsRoutes(newsRepository)
 
         // React 앱 서빙
         static("/") {

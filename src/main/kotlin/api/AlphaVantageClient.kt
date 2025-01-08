@@ -1,4 +1,4 @@
-/* import io.ktor.client.*
+import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
@@ -19,14 +19,16 @@ val client = HttpClient(CIO) {
 }
 
 fun main() {
-    val apiKey = "UEHWN0KQRKUCS009" // 발급받은 API 키
-    val symbol = "TSLA" // Apple 주식 티커
+    val apiKey = "d9e10916798242b198db93055486f452" // 발급받은 API 키
+    val symbols = "KRX:005380"
+    val date_from = "2025-01-06"
+    val date_to = "2025-01-06"
 
     runBlocking {
-        val response: HttpResponse = client.get("https://www.alphavantage.co/query") {
-            parameter("function", "TIME_SERIES_DAILY")
-            parameter("symbol", symbol)
-            parameter("apikey", apiKey)
+        val response: HttpResponse = client.get("https://api-v2.deepsearch.com/v1/articles") {
+            parameter("symbols", symbols)
+            parameter("date_from", date_from)
+            parameter("deta_to", date_to)
         }
 
 
@@ -35,21 +37,8 @@ fun main() {
         val json = Json.parseToJsonElement(responseBody).jsonObject
         val timeSeries = json["Time Series (Daily)"]?.jsonObject
 
-        // 가장 첫 번째 데이터(가장 최근 데이터) 가져오기
-        timeSeries?.entries?.firstOrNull()?.let { (date, data) ->
-            println("가장 최근 날짜: $date")
-            println("가장 최근 데이터: $data")
-        } ?: println("Time Series 데이터를 찾을 수 없습니다.")
     }
 
-    suspend fun searchSymbols(keywords: String): HttpResponse {
-        return client.get("https://www.alphavantage.co/query") {
-            parameter("function", "SYMBOL_SEARCH")
-            parameter("keywords", keywords)
-            parameter("apikey", apiKey)
-        }
-    }
 }
 
-참고용 코드 */
 
