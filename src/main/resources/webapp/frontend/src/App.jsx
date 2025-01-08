@@ -1,10 +1,10 @@
 // src/App.jsx
 import { useState, useEffect } from 'react'
 import PortfolioDashboard from './components/PortfolioDashboard'
-import NewsDashboard from './components/NewsDashboard'
 import PostList from './components/PostList'
 import PostModal from './components/PostModal'
 import './styles/style.css'
+import NewsDashboard from "./components/NewsDashboard.jsx";
 
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);

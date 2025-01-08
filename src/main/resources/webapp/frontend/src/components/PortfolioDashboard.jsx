@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import NewsDashboard from "./NewsDashboard.jsx";
 
 const PortfolioDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -194,42 +195,49 @@ const PortfolioDashboard = () => {
                 </div>
             </div>
 
-            {/* Portfolio Overview and Chart Section */}
-            <div className="portfolio-overview glass-card">
-                <div className="portfolio-chart-section">
-                    <h2>포트폴리오 구성</h2>
-                    {portfolio.length > 0 ? (
-                        <div className="chart-container">
-                            <ResponsiveContainer width="100%" height={400}>
-                                <PieChart>
-                                    <Pie
-                                        data={chartData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={({ name }) => name}
-                                        outerRadius={160}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {chartData.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={COLORS[index % COLORS.length]}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
+            <div className="portfolio-container">
+                <div className="portfolio-main">
+                    {/* Portfolio Overview and Chart Section */}
+                    <div className="portfolio-overview glass-card">
+                        <div className="portfolio-chart-section">
+                            <h2>포트폴리오 구성</h2>
+                            {portfolio.length > 0 ? (
+                                <div className="chart-container">
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <PieChart>
+                                            <Pie
+                                                data={chartData}
+                                                cx="50%"
+                                                cy="50%"
+                                                labelLine={false}
+                                                label={({name}) => name}
+                                                outerRadius={160}
+                                                fill="#8884d8"
+                                                dataKey="value"
+                                            >
+                                                {chartData.map((entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={COLORS[index % COLORS.length]}
+                                                    />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip/>
+                                            <Legend/>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            ) : (
+                                <div className="empty-portfolio glass-effect">
+                                    <p>포트폴리오를 구성해보세요</p>
+                                    <span>상단의 검색창에서 종목을 검색하고 추가할 수 있습니다</span>
+                                </div>
+                            )}
                         </div>
-                    ) : (
-                        <div className="empty-portfolio glass-effect">
-                            <p>포트폴리오를 구성해보세요</p>
-                            <span>상단의 검색창에서 종목을 검색하고 추가할 수 있습니다</span>
-                        </div>
-                    )}
+                    </div>
+                </div>
+                <div className="portfolio-news">
+                    <NewsDashboard portfolio={portfolio}/>
                 </div>
             </div>
 
@@ -255,7 +263,8 @@ const PortfolioDashboard = () => {
                                     className="quantity-input glass-effect"
                                 />
                                 <div className="button-group">
-                                    <button onClick={handleQuantitySubmit} className="confirm-button glass-button">
+                                    <button onClick={handleQuantitySubmit}
+                                            className="confirm-button glass-button">
                                         확인
                                     </button>
                                     <button

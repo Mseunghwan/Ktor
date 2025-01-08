@@ -4,7 +4,7 @@ API_KEY = "d9e10916798242b198db93055486f452"
 BASE_URL = "https://api-v2.deepsearch.com/v1/articles"
 
 # 종목 코드 및 날짜 설정
-symbols = "KRX:005380"
+symbols = "KRX:000810"
 date_from = "2025-01-06"
 date_to = "2025-01-06"
 

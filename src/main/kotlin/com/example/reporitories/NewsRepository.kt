@@ -22,57 +22,63 @@ interface NewsRepository {
 class NewsRepositoryImpl : NewsRepository {
     private val client = HttpClient()
     private val apiKey = "d9e10916798242b198db93055486f452"
-    private val baseUrl = "https://api-v2.deepsearch.com/v1"
+    private val baseUrl = "https://news.deepsearch.com/api"
 
     override suspend fun getDomesticNews(symbols: String, date: String): List<NewsArticle> {
         return try {
-            val response = client.get("$baseUrl/articles") {
+            val response = client.get("$baseUrl/news") {
                 parameter("symbols", symbols)
-                parameter("date_from", date)
-                parameter("date_to", date)
+                parameter("date", date)
                 parameter("api_key", apiKey)
             }
 
+            println("Domestic news API response: ${response.bodyAsText()}") // 디버깅용
             val jsonResponse = Json.parseToJsonElement(response.bodyAsText())
             parseNewsResponse(jsonResponse)
         } catch (e: Exception) {
             println("Error fetching domestic news: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
 
     override suspend fun getGlobalNews(symbols: String, date: String): List<NewsArticle> {
         return try {
-            val response = client.get("$baseUrl/global-articles") {
+            val response = client.get("$baseUrl/global-news") {
                 parameter("symbols", symbols)
-                parameter("date_from", date)
-                parameter("date_to", date)
+                parameter("date", date)
                 parameter("api_key", apiKey)
             }
 
+            println("Global news API response: ${response.bodyAsText()}") // 디버깅용
             val jsonResponse = Json.parseToJsonElement(response.bodyAsText())
             parseNewsResponse(jsonResponse)
         } catch (e: Exception) {
             println("Error fetching global news: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
 
     private fun parseNewsResponse(jsonResponse: JsonElement): List<NewsArticle> {
         return try {
-            val articles = jsonResponse.jsonObject["data"]?.jsonArray ?: return emptyList()
+            val articles = jsonResponse.jsonObject["articles"]?.jsonArray
+                ?: jsonResponse.jsonObject["data"]?.jsonArray
+                ?: return emptyList()
+
             articles.mapNotNull { article ->
                 article.jsonObject.let {
                     NewsArticle(
                         title = it["title"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        summary = it["summary"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        date = it["date"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        source = it["source"]?.jsonPrimitive?.content ?: "Unknown"
+                        summary = it["summary"]?.jsonPrimitive?.content ?: it["description"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        date = it["date"]?.jsonPrimitive?.content ?: it["published_at"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        source = it["source"]?.jsonPrimitive?.content ?: it["source_name"]?.jsonPrimitive?.content ?: "Unknown"
                     )
                 }
             }
         } catch (e: Exception) {
             println("Error parsing news response: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
