@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
+import { ChevronDown } from 'lucide-react';
 
 const NewsDashboard = ({ portfolio }) => {
     const [news, setNews] = useState([]);
+    const [filteredNews, setFilteredNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedStock, setSelectedStock] = useState('all');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 20;
 
-    // 날짜 포맷팅 헬퍼 함수
     const formatDate = (dateStr) => {
         try {
-            // published_at이 ISO 형식인 경우
             const date = parseISO(dateStr);
             return format(date, 'yyyy-MM-dd HH:mm');
         } catch (e) {
             console.error('Date parsing error:', e);
-            return dateStr; // 파싱 실패시 원본 문자열 반환
+            return dateStr;
         }
     };
+
+    const loadMore = () => {
+        if (!loading && hasMore) {
+            setPage(prev => prev + 1);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedStock === 'all') {
+            setFilteredNews(news.slice(0, page * PAGE_SIZE));
+            setHasMore(news.length > page * PAGE_SIZE);
+        } else {
+            const filtered = news.filter(article =>
+                article.companies?.some(company => company.symbol === selectedStock)
+            );
+            setFilteredNews(filtered.slice(0, page * PAGE_SIZE));
+            setHasMore(filtered.length > page * PAGE_SIZE);
+        }
+    }, [news, selectedStock, page]);
 
     useEffect(() => {
         const fetchNews = async () => {
@@ -31,7 +54,6 @@ const NewsDashboard = ({ portfolio }) => {
                 const today = format(new Date(), 'yyyy-MM-dd');
                 const allNews = [];
 
-                // 국내/해외 주식 분리
                 const domesticStocks = portfolio.filter(stock => stock.market === 'KOSPI' || stock.market === 'KOSDAQ');
                 const globalStocks = portfolio.filter(stock => stock.market === 'NYSE' || stock.market === 'NASDAQ');
 
@@ -39,24 +61,39 @@ const NewsDashboard = ({ portfolio }) => {
                 if (domesticStocks.length > 0) {
                     const domesticSymbols = domesticStocks.map(stock => `KRX:${stock.symbol}`).join(',');
                     console.log("Fetching news for domestic stocks:", domesticSymbols);
-                    const response = await fetch(`/api/news/domestic?symbols=${domesticSymbols}&date=${today}`);
+                    const response = await fetch(`/api/news/domestic?symbols=${domesticSymbols}&date=${today}&page=${page}&size=100`);
                     if (!response.ok) throw new Error(`Domestic API Error: ${response.statusText}`);
                     const data = await response.json();
                     allNews.push(...data);
                 }
 
-                // 해외 주식 뉴스 요청
+                // 해외 주식 뉴스 요청 - 종목별로 개별 요청
                 if (globalStocks.length > 0) {
-                    const globalSymbols = globalStocks.map(stock => `${stock.market}:${stock.symbol}`).join(',');
-                    console.log("Fetching news for global stocks:", globalSymbols);
-                    const response = await fetch(`/api/news/global?symbols=${globalSymbols}&date=${today}`);
-                    if (!response.ok) throw new Error(`Global API Error: ${response.statusText}`);
-                    const data = await response.json();
-                    allNews.push(...data);
+                    const globalNewsPromises = globalStocks.map(stock => {
+                        const symbol = `${stock.market}:${stock.symbol}`;
+                        console.log("Fetching news for global stock:", symbol);
+                        return fetch(`/api/news/global?symbols=${symbol}&date=${today}&page=${page}&size=100`)
+                            .then(res => res.json())
+                            .catch(err => {
+                                console.error(`Error fetching news for ${symbol}:`, err);
+                                return [];
+                            });
+                    });
+
+                    const globalNewsResults = await Promise.all(globalNewsPromises);
+                    globalNewsResults.forEach(result => {
+                        if (Array.isArray(result)) {
+                            allNews.push(...result);
+                        }
+                    });
                 }
 
-                console.log("All fetched news:", allNews);
-                setNews(allNews);
+                // 중복 제거 및 날짜순 정렬
+                const uniqueNews = Array.from(new Map(allNews.map(item => [item.title, item])).values());
+                const sortedNews = uniqueNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                console.log("All fetched news:", sortedNews);
+                setNews(sortedNews);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching news:', err);
@@ -68,9 +105,9 @@ const NewsDashboard = ({ portfolio }) => {
         fetchNews();
     }, [portfolio]);
 
-    if (loading) {
+    if (loading && page === 1) {
         return (
-            <div className="news-dashboard glass-card">
+            <div className="news-dashboard backdrop-blur-lg bg-white/80 rounded-3xl p-8">
                 <div className="flex items-center justify-center h-64">
                     <div className="search-loading"></div>
                     <span className="ml-3">뉴스를 불러오는 중...</span>
@@ -81,41 +118,57 @@ const NewsDashboard = ({ portfolio }) => {
 
     if (error) {
         return (
-            <div className="news-dashboard glass-card">
+            <div className="news-dashboard backdrop-blur-lg bg-white/80 rounded-3xl p-8">
                 <div className="text-red-500 p-4">{error}</div>
             </div>
         );
     }
 
-    if (!news || news.length === 0) {
-        return (
-            <div className="news-dashboard glass-card">
-                <div className="empty-news">
-                    <p>관련 뉴스가 없습니다</p>
-                    <span>포트폴리오에 주식을 추가하면 관련 뉴스가 표시됩니다</span>
+    return (
+        <div className="news-dashboard">
+            <div className="news-header">
+                <h2 className="news-title-gradient">포트폴리오 관련 뉴스</h2>
+                <div className="news-select">
+                    <select
+                        value={selectedStock}
+                        onChange={(e) => {
+                            setSelectedStock(e.target.value);
+                            setPage(1);
+                        }}
+                    >
+                        <option value="all">전체 종목</option>
+                        {portfolio.map(stock => (
+                            <option key={stock.symbol} value={stock.symbol}>
+                                {stock.name} ({stock.symbol})
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
-        );
-    }
 
-    return (
-        <div className="news-dashboard glass-card">
-            <h2 className="text-2xl font-semibold mb-4">포트폴리오 관련 뉴스</h2>
-            <div className="news-list space-y-4">
-                {news.map((article, index) => {
-                    // 각 뉴스 항목에 대한 날짜 처리를 별도로 수행
-                    const formattedDate = formatDate(article.date);
-                    return (
-                        <div key={index} className="news-item glass-effect p-4 rounded-lg">
-                            <h3 className="text-lg font-medium mb-2">{article.title}</h3>
-                            <p className="text-sm text-gray-600 mb-2">{article.summary}</p>
-                            <div className="flex justify-between items-center text-xs text-gray-500">
-                                <span>{formattedDate}</span>
+            <div className="news-list">
+                {filteredNews.map((article, index) => (
+                    <div key={index} className="news-item">
+                        <a href={article.content_url}
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <h3 className="news-title">{article.title}</h3>
+                            <p className="news-summary">{article.summary}</p>
+                            <div className="news-meta">
+                                <span>{formatDate(article.date)}</span>
                                 <span>{article.source}</span>
                             </div>
-                        </div>
-                    );
-                })}
+                        </a>
+                    </div>
+                ))}
+
+                {hasMore && (
+                    <div className="load-more">
+                        <button onClick={loadMore} className="load-more-button">
+                            더 보기
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

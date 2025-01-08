@@ -1388,3 +1388,60 @@ body {
         color: #86868b;
     }
 }
+
+/* News Dashboard에 추가할 CSS */
+.news-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #1d1d1f;
+}
+
+.news-summary {
+    font-size: 0.875rem;
+    color: #424245;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.news-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #86868b;
+}
+
+.news-select {
+    position: relative;
+    display: inline-block;
+}
+
+.news-select select {
+    appearance: none;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.news-title-gradient {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(to right, #1d1d1f, #434343);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
