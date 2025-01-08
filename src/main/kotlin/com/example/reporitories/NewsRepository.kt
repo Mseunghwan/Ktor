@@ -5,13 +5,25 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import java.time.LocalDate
 
 @Serializable
 data class NewsArticle(
     val title: String,
     val summary: String,
     val date: String,
-    val source: String
+    val source: String,
+    val content_url: String,
+    val importance: String? = null,
+    val sentiment: String? = null,
+    val companies: List<CompanyMention>? = null
+)
+
+@Serializable
+data class CompanyMention(
+    val symbol: String,
+    val name: String,
+    val sentiment: String? = null
 )
 
 interface NewsRepository {
@@ -22,19 +34,51 @@ interface NewsRepository {
 class NewsRepositoryImpl : NewsRepository {
     private val client = HttpClient()
     private val apiKey = "d9e10916798242b198db93055486f452"
-    private val baseUrl = "https://news.deepsearch.com/api"
+    private val baseUrl = "https://api-v2.deepsearch.com/v1"
 
     override suspend fun getDomesticNews(symbols: String, date: String): List<NewsArticle> {
         return try {
-            val response = client.get("$baseUrl/news") {
+            val response = client.get("$baseUrl/articles") {
                 parameter("symbols", symbols)
-                parameter("date", date)
+                parameter("date_from", date)
+                parameter("date_to", date)
                 parameter("api_key", apiKey)
             }
 
-            println("Domestic news API response: ${response.bodyAsText()}") // 디버깅용
-            val jsonResponse = Json.parseToJsonElement(response.bodyAsText())
-            parseNewsResponse(jsonResponse)
+            val responseBody = response.bodyAsText()
+            println("Domestic API Response: $responseBody")
+
+            val jsonResponse = Json.parseToJsonElement(responseBody).jsonObject
+            jsonResponse["data"]?.jsonArray?.mapNotNull { article ->
+                article.jsonObject.let {
+                    NewsArticle(
+                        title = it["title"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        summary = it["summary"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        date = it["published_at"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        source = it["publisher"]?.jsonPrimitive?.content ?: "Unknown",
+                        content_url = it["content_url"]?.jsonPrimitive?.content ?: "",
+                        importance = it["importance"]?.jsonPrimitive?.content,
+                        sentiment = if (it.containsKey("sentiment")) {
+                            when {
+                                it["sentiment"]?.jsonPrimitive?.content?.toDoubleOrNull()?.let { score -> score > 0.3 } == true -> "positive"
+                                it["sentiment"]?.jsonPrimitive?.content?.toDoubleOrNull()?.let { score -> score < -0.3 } == true -> "negative"
+                                else -> "neutral"
+                            }
+                        } else {
+                            "neutral"
+                        },
+                        companies = it["companies"]?.jsonArray?.mapNotNull { company ->
+                            company.jsonObject.let { companyObj ->
+                                CompanyMention(
+                                    symbol = companyObj["symbol"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                                    name = companyObj["name"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                                    sentiment = companyObj["sentiment"]?.jsonPrimitive?.content
+                                )
+                            }
+                        }
+                    )
+                }
+            } ?: emptyList()
         } catch (e: Exception) {
             println("Error fetching domestic news: ${e.message}")
             e.printStackTrace()
@@ -44,40 +88,49 @@ class NewsRepositoryImpl : NewsRepository {
 
     override suspend fun getGlobalNews(symbols: String, date: String): List<NewsArticle> {
         return try {
-            val response = client.get("$baseUrl/global-news") {
+            val response = client.get("$baseUrl/global-articles") {
                 parameter("symbols", symbols)
-                parameter("date", date)
+                parameter("date_from", date)
+                parameter("date_to", date)
                 parameter("api_key", apiKey)
             }
 
-            println("Global news API response: ${response.bodyAsText()}") // 디버깅용
-            val jsonResponse = Json.parseToJsonElement(response.bodyAsText())
-            parseNewsResponse(jsonResponse)
-        } catch (e: Exception) {
-            println("Error fetching global news: ${e.message}")
-            e.printStackTrace()
-            emptyList()
-        }
-    }
+            val responseBody = response.bodyAsText()
+            println("Global API Response: $responseBody")
 
-    private fun parseNewsResponse(jsonResponse: JsonElement): List<NewsArticle> {
-        return try {
-            val articles = jsonResponse.jsonObject["articles"]?.jsonArray
-                ?: jsonResponse.jsonObject["data"]?.jsonArray
-                ?: return emptyList()
-
-            articles.mapNotNull { article ->
+            val jsonResponse = Json.parseToJsonElement(responseBody).jsonObject
+            jsonResponse["data"]?.jsonArray?.mapNotNull { article ->
                 article.jsonObject.let {
                     NewsArticle(
                         title = it["title"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        summary = it["summary"]?.jsonPrimitive?.content ?: it["description"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        date = it["date"]?.jsonPrimitive?.content ?: it["published_at"]?.jsonPrimitive?.content ?: return@mapNotNull null,
-                        source = it["source"]?.jsonPrimitive?.content ?: it["source_name"]?.jsonPrimitive?.content ?: "Unknown"
+                        summary = it["summary"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        date = it["published_at"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                        source = it["publisher"]?.jsonPrimitive?.content ?: "Unknown",
+                        content_url = it["content_url"]?.jsonPrimitive?.content ?: "",
+                        importance = it["importance"]?.jsonPrimitive?.content,
+                        sentiment = if (it.containsKey("sentiment")) {
+                            when {
+                                it["sentiment"]?.jsonPrimitive?.content?.toDoubleOrNull()?.let { score -> score > 0.3 } == true -> "positive"
+                                it["sentiment"]?.jsonPrimitive?.content?.toDoubleOrNull()?.let { score -> score < -0.3 } == true -> "negative"
+                                else -> "neutral"
+                            }
+                        } else {
+                            "neutral"
+                        },
+                        companies = it["companies"]?.jsonArray?.mapNotNull { company ->
+                            company.jsonObject.let { companyObj ->
+                                CompanyMention(
+                                    symbol = companyObj["symbol"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                                    name = companyObj["name"]?.jsonPrimitive?.content ?: return@mapNotNull null,
+                                    sentiment = companyObj["sentiment"]?.jsonPrimitive?.content
+                                )
+                            }
+                        }
                     )
                 }
-            }
+            } ?: emptyList()
         } catch (e: Exception) {
-            println("Error parsing news response: ${e.message}")
+            println("Error fetching global news: ${e.message}")
             e.printStackTrace()
             emptyList()
         }

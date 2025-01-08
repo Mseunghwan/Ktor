@@ -38,14 +38,7 @@ function App() {
 
             <main>
                 <section id="portfolio" className="hero-section">
-                    <div className="portfolio-container">
-                        <div className="portfolio-main">
-                            <PortfolioDashboard/>
-                        </div>
-                        <div className="portfolio-news">
-                            <NewsDashboard portfolio={posts}/>
-                        </div>
-                    </div>
+                    <PortfolioDashboard />
                 </section>
 
                 <section id="community" className="community-section">

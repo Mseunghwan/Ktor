@@ -1,12 +1,12 @@
 import requests
 
 API_KEY = "d9e10916798242b198db93055486f452"
-BASE_URL = "https://api-v2.deepsearch.com/v1/articles"
+BASE_URL = "https://api-v2.deepsearch.com/v1/global-articles"
 
 # 종목 코드 및 날짜 설정
-symbols = "KRX:000810"
-date_from = "2025-01-06"
-date_to = "2025-01-06"
+symbols = "NASDAQ:AAPL"
+date_from = "2025-01-07"
+date_to = "2025-01-07"
 
 # 요청 URL 생성
 url = f"{BASE_URL}?symbols={symbols}&date_from={date_from}&date_to={date_to}&api_key={API_KEY}"
