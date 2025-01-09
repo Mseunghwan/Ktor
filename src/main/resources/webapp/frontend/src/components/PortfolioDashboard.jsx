@@ -200,7 +200,6 @@ const PortfolioDashboard = () => {
                     {/* Portfolio Overview and Chart Section */}
                     <div className="portfolio-overview glass-card">
                         <div className="portfolio-chart-section">
-                            <h2>포트폴리오 구성</h2>
                             {portfolio.length > 0 ? (
                                 <div className="chart-container">
                                     <ResponsiveContainer width="100%" height={400}>
@@ -217,7 +216,7 @@ const PortfolioDashboard = () => {
                                             >
                                                 {chartData.map((entry, index) => (
                                                     <Cell
-                                                        key={`cell-${index}`}
+                                                        keyㄴ={`cell-${index}`}
                                                         fill={COLORS[index % COLORS.length]}
                                                     />
                                                 ))}

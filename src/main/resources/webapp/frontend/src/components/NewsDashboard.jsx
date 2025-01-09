@@ -127,7 +127,7 @@ const NewsDashboard = ({ portfolio }) => {
     return (
         <div className="news-dashboard">
             <div className="news-header">
-                <h2 className="news-title-gradient">포트폴리오 관련 뉴스</h2>
+                <h2 className="news-title-gradient">관련 뉴스</h2>
                 <div className="news-select">
                     <select
                         value={selectedStock}
