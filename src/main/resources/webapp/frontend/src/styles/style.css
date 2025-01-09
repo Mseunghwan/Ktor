@@ -1096,46 +1096,6 @@ body {
     color: #0071e3;
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .glass-effect {
-        background: rgba(0, 0, 0, 0.7);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .glass-card {
-        background: rgba(0, 0, 0, 0.8);
-    }
-
-    .hero-title {
-        background: linear-gradient(135deg, #ffffff 0%, #a1a1a6 100%);
-        -webkit-background-clip: text;
-    }
-
-    .hero-subtitle {
-        color: #a1a1a6;
-    }
-
-    .search-input,
-    .market-select,
-    .stock-symbol {
-        color: #ffffff;
-    }
-
-    .stock-name,
-    .result-sector {
-        color: #a1a1a6;
-    }
-
-    .empty-portfolio p {
-        color: #ffffff;
-    }
-
-    .empty-portfolio span {
-        color: #a1a1a6;
-    }
-}
-
 /* News Dashboard Styles */
 .news-dashboard {
     margin-top: 2rem;
