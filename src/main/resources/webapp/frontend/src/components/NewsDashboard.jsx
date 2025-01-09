@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, parseISO } from 'date-fns';
+import {format, parseISO, subDays} from 'date-fns';
 import { ChevronDown } from 'lucide-react';
 
 const NewsDashboard = ({ portfolio }) => {
@@ -51,7 +51,7 @@ const NewsDashboard = ({ portfolio }) => {
 
             try {
                 setLoading(true);
-                const today = format(new Date(), 'yyyy-MM-dd');
+                const today = format(subDays(new Date(), 1), 'yyyy-MM-dd');
                 const allNews = [];
 
                 const domesticStocks = portfolio.filter(stock => stock.market === 'KOSPI' || stock.market === 'KOSDAQ');
