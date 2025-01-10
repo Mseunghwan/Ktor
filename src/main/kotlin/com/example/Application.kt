@@ -23,7 +23,7 @@ import io.ktor.server.plugins.cors.routing.*
 
 
 fun main() {
-    embeddedServer(Netty, port = 8080, module = {
+    embeddedServer(Netty, port = 8081, module = {
         // 수동으로 설정 추가
         val config = MapApplicationConfig().apply {
             put("database.driver", System.getenv("DB_DRIVER") ?: "org.mariadb.jdbc.Driver")
