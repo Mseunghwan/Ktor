@@ -561,7 +561,11 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .portfolio-chart-section{
-    width: 100%
+    width: 100%;
+}
+
+.portfolio-news{
+    max-height:500px;
 }
 
 /* 주식 입력 모달 스타일 */
@@ -1148,6 +1152,7 @@ body {
 }
 
 .news-list {
+    height:300px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -1422,7 +1427,7 @@ body {
 
 .news-select select {
     appearance: none;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    padding: 0.75rem 1rem 0.75rem 1rem;
     border-radius: 1rem;
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
